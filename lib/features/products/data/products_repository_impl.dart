@@ -338,14 +338,20 @@ class ProductsRepositoryImpl implements ProductsRepository {
 
     final thumbName = 'thumb_${_uuid.v4()}.jpg';
     final thumbTarget = p.join(thumbsDir.path, thumbName);
-    await FlutterImageCompress.compressAndGetFile(
-      imageTarget,
-      thumbTarget,
-      quality: 55,
-      minWidth: 420,
-      minHeight: 420,
-      format: CompressFormat.jpeg,
-    );
+    try {
+      await FlutterImageCompress.compressAndGetFile(
+        imageTarget,
+        thumbTarget,
+        quality: 55,
+        minWidth: 420,
+        minHeight: 420,
+        format: CompressFormat.jpeg,
+      );
+    } on UnimplementedError {
+      // Fallback para plataformas donde flutter_image_compress no está implementado
+      // (p.ej., algunos entornos Windows desktop).
+      await File(imageTarget).copy(thumbTarget);
+    }
 
     final countExp = _db.productImages.id.count();
     final q = _db.selectOnly(_db.productImages)

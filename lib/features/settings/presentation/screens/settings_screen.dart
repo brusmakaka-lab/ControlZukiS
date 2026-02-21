@@ -168,25 +168,49 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                         if (value == null || value == u.role) {
                                           return;
                                         }
-                                        await ref
-                                            .read(settingsControllerProvider)
-                                            .updateUserRole(
-                                              userId: u.id,
-                                              role: value,
-                                            );
-                                        await _load();
+                                        final messenger = ScaffoldMessenger.of(
+                                          context,
+                                        );
+                                        try {
+                                          await ref
+                                              .read(settingsControllerProvider)
+                                              .updateUserRole(
+                                                userId: u.id,
+                                                role: value,
+                                              );
+                                          await _load();
+                                        } catch (e) {
+                                          if (!mounted) return;
+                                          messenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
+                                          );
+                                        }
                                       },
                                     ),
                                     Switch(
                                       value: u.isActive,
                                       onChanged: (value) async {
-                                        await ref
-                                            .read(settingsControllerProvider)
-                                            .setUserActive(
-                                              userId: u.id,
-                                              isActive: value,
-                                            );
-                                        await _load();
+                                        final messenger = ScaffoldMessenger.of(
+                                          context,
+                                        );
+                                        try {
+                                          await ref
+                                              .read(settingsControllerProvider)
+                                              .setUserActive(
+                                                userId: u.id,
+                                                isActive: value,
+                                              );
+                                          await _load();
+                                        } catch (e) {
+                                          if (!mounted) return;
+                                          messenger.showSnackBar(
+                                            SnackBar(
+                                              content: Text(e.toString()),
+                                            ),
+                                          );
+                                        }
                                       },
                                     ),
                                   ],
@@ -346,24 +370,34 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       },
     );
 
-    if (ok != true) return;
-    await ref
-        .read(settingsControllerProvider)
-        .updateCompanyProfile(
-          CompanyProfileInput(
-            name: nameCtrl.text.trim(),
-            legalName: legalCtrl.text.trim().isEmpty
-                ? null
-                : legalCtrl.text.trim(),
-            taxId: taxCtrl.text.trim().isEmpty ? null : taxCtrl.text.trim(),
-            email: emailCtrl.text.trim().isEmpty ? null : emailCtrl.text.trim(),
-            phone: phoneCtrl.text.trim().isEmpty ? null : phoneCtrl.text.trim(),
-            address: addressCtrl.text.trim().isEmpty
-                ? null
-                : addressCtrl.text.trim(),
-          ),
-        );
-    await _load();
+    if (ok != true || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(settingsControllerProvider)
+          .updateCompanyProfile(
+            CompanyProfileInput(
+              name: nameCtrl.text.trim(),
+              legalName: legalCtrl.text.trim().isEmpty
+                  ? null
+                  : legalCtrl.text.trim(),
+              taxId: taxCtrl.text.trim().isEmpty ? null : taxCtrl.text.trim(),
+              email: emailCtrl.text.trim().isEmpty
+                  ? null
+                  : emailCtrl.text.trim(),
+              phone: phoneCtrl.text.trim().isEmpty
+                  ? null
+                  : phoneCtrl.text.trim(),
+              address: addressCtrl.text.trim().isEmpty
+                  ? null
+                  : addressCtrl.text.trim(),
+            ),
+          );
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
 
   Future<void> _createUser() async {
@@ -430,17 +464,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       },
     );
 
-    if (ok != true) return;
-    await ref
-        .read(settingsControllerProvider)
-        .createUser(
-          UserInput(
-            name: nameCtrl.text.trim(),
-            email: emailCtrl.text.trim(),
-            role: role,
-            password: passwordCtrl.text,
-          ),
-        );
-    await _load();
+    if (ok != true || !mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      await ref
+          .read(settingsControllerProvider)
+          .createUser(
+            UserInput(
+              name: nameCtrl.text.trim(),
+              email: emailCtrl.text.trim(),
+              role: role,
+              password: passwordCtrl.text,
+            ),
+          );
+      await _load();
+    } catch (e) {
+      if (!mounted) return;
+      messenger.showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
 }
